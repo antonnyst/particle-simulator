@@ -73,6 +73,23 @@ public class CameraRunner : MonoBehaviour
                 pos.y + ((Input.mousePosition.y - (Screen.height / 2f)) * pixelSize)
             );
 
+            if (mousePos.x < 0)
+            {
+                mousePos.x += simulationRunner.width;
+            }
+            if (mousePos.x > simulationRunner.width)
+            {
+                mousePos.x += -simulationRunner.width;
+            }
+            if (mousePos.y < 0)
+            {
+                mousePos.y += simulationRunner.width;
+            }
+            if (mousePos.y > simulationRunner.width)
+            {
+                mousePos.y += -simulationRunner.width;
+            }
+
             int closest = -1;
             float dist = Mathf.Infinity;
             for (int i = 0; i < atoms.Length; i++)
