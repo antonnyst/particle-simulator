@@ -152,7 +152,7 @@ public class CameraRunner : MonoBehaviour
         int width = source.width;
         int height = source.height;
        
-        int renderKernel = computeShader.FindKernel("Render3");
+        int renderKernel = computeShader.FindKernel("RepeatingRender");
         int clearKernel = computeShader.FindKernel("Clear");
         
         int atomsSize = sizeof(int) + sizeof(float) * 4;
