@@ -1,5 +1,6 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel Render
+#pragma kernel Render3 
+#pragma kernel Render2
 #pragma kernel Clear
 
 struct Atom {
@@ -93,7 +94,132 @@ void Render (uint3 id : SV_DispatchThreadID)
             }
         }
     }
+}
 
+[numthreads(32, 1, 1)]
+void Render2(uint3 id : SV_DispatchThreadID)
+{
+    int checkSize = (int)(1.25 * (AtomSize / PixelSize));
+
+    int2 minPixel = PositionToPixel(float2(0, 0));
+    int2 maxPixel = PositionToPixel(float2(SimulationWidth, SimulationHeight));
+
+    Atom atom = Atoms[id.x];
+
+    float2 pos = atom.position;
+    
+    for (int dxx = -1; dxx <= 1; dxx++) {
+        for (int dyy = -1; dyy <= 1; dyy++) {
+            int2 atomPixel = PositionToPixel(pos + float2(dxx * SimulationWidth, dyy * SimulationHeight));
+            if (checkSize == 0) {
+                Result[atomPixel] = Colors[atom.type];
+                continue;
+            }
+            for (int dx = -checkSize; dx <= checkSize; dx++) {
+                for (int dy = -checkSize; dy <= checkSize; dy++) {
+                    int2 newPixel = int2(dx + atomPixel.x, dy + atomPixel.y);
+
+                    float2 newPosition = PixelToPosition(newPixel);
+
+                    float dx = atom.position.x - newPosition.x;
+                    if (dx > SimulationWidth / 2.0) {
+                        dx = dx - SimulationWidth;
+                    }
+                    else if (-dx > SimulationWidth / 2.0) {
+                        dx = SimulationWidth + dx;
+                    }
+                    float dy = atom.position.y - newPosition.y;
+                    if (dy > SimulationHeight / 2.0) {
+                        dy = dy - SimulationHeight;
+                    }
+                    else if (-dy > SimulationHeight / 2.0) {
+                        dy = SimulationHeight + dy;
+                    }
+
+                    float2 diff = float2(dx, dy);
+
+                    float len = length(diff);
+                    if (len < AtomSize) {
+                        Result[newPixel] = Colors[atom.type] * (len / AtomSize);
+                    }
+                }
+            }
+        }
+    }
+}
+
+[numthreads(32, 1, 1)]
+void Render3(uint3 id : SV_DispatchThreadID)
+{
+    int checkSize = (int)(1.25 * (AtomSize / PixelSize));
+
+    int2 minPixel = PositionToPixel(float2(0, 0));
+    int2 maxPixel = PositionToPixel(float2(SimulationWidth, SimulationHeight));
+
+    float2 screenMin = PixelToPosition(int2(0, 0));
+    float2 screenMax = PixelToPosition(int2(Width, Height));
+
+    Atom atom = Atoms[id.x];
+
+    float2 pos = atom.position;
+
+    for (int dxx = -1; dxx <= 1; dxx++) {
+        for (int dyy = -1; dyy <= 1; dyy++) {
+            float2 checkPosition = (
+                (Position + float2(Width, Height) * PixelSize) + 
+                (float2(dxx, dyy) * (float2(Width, Height) * PixelSize / 2)));
+            bool check = false;
+            if (checkPosition.x > screenMin.x) {
+                check = true;
+            }
+            if (checkPosition.x < screenMax.x) {
+                check = true;
+            }
+            if (checkPosition.y > screenMin.y) {
+                check = true;
+            }
+            if (checkPosition.y < screenMax.y) {
+                check = true;
+            }
+
+            if (check) {
+                int2 atomPixel = PositionToPixel(pos + float2(dxx * SimulationWidth, dyy * SimulationHeight));
+                if (checkSize == 0) {
+                    Result[atomPixel] = Colors[atom.type];
+                    continue;
+                }
+                for (int dx = -checkSize; dx <= checkSize; dx++) {
+                    for (int dy = -checkSize; dy <= checkSize; dy++) {
+                        int2 newPixel = int2(dx + atomPixel.x, dy + atomPixel.y);
+
+                        float2 newPosition = PixelToPosition(newPixel);
+
+                        float dx = atom.position.x - newPosition.x;
+                        if (dx > SimulationWidth / 2.0) {
+                            dx = dx - SimulationWidth;
+                        }
+                        else if (-dx > SimulationWidth / 2.0) {
+                            dx = SimulationWidth + dx;
+                        }
+                        float dy = atom.position.y - newPosition.y;
+                        if (dy > SimulationHeight / 2.0) {
+                            dy = dy - SimulationHeight;
+                        }
+                        else if (-dy > SimulationHeight / 2.0) {
+                            dy = SimulationHeight + dy;
+                        }
+
+                        float2 diff = float2(dx, dy);
+
+                        float len = length(diff);
+                        if (len < AtomSize) {
+                            Result[newPixel] = Colors[atom.type] * (len / AtomSize);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 [numthreads(8, 8, 1)]

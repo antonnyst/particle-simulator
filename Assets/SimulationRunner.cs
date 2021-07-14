@@ -85,12 +85,11 @@ public class SimulationRunner : MonoBehaviour
 
     void RunSim(float deltaTime)
     {
-        int kernel = computeShader.FindKernel("Simulate");
+        int calculateKernel = computeShader.FindKernel("CalculateVelocity");
+        int applyKernel = computeShader.FindKernel("ApplyVelocity");
+        
         int atomsSize = sizeof(int) + sizeof(float) * 4;
-        ComputeBuffer atomsBuffer = new ComputeBuffer(atoms.Length, atomsSize);
-        atomsBuffer.SetData(atoms);
 
-        computeShader.SetBuffer(kernel, "atoms", atomsBuffer);
         computeShader.SetFloat("time", deltaTime);
         computeShader.SetFloat("friction", 1 - friction);
         computeShader.SetFloats("typesStrength", typesStrength);
@@ -100,8 +99,18 @@ public class SimulationRunner : MonoBehaviour
         computeShader.SetFloat("width", width);
         computeShader.SetFloat("height", width);
 
-        computeShader.Dispatch(kernel, atoms.Length/32, 1, 1);
 
+        ComputeBuffer atomsBuffer = new ComputeBuffer(atoms.Length, atomsSize);
+        atomsBuffer.SetData(atoms);
+        computeShader.SetBuffer(calculateKernel, "atoms", atomsBuffer);
+        computeShader.Dispatch(calculateKernel, Mathf.CeilToInt(atoms.Length / 32), 1, 1);
+        atomsBuffer.GetData(atoms);
+        atomsBuffer.Dispose();
+        
+        atomsBuffer = new ComputeBuffer(atoms.Length, atomsSize);
+        atomsBuffer.SetData(atoms);
+        computeShader.SetBuffer(applyKernel, "atoms", atomsBuffer);
+        computeShader.Dispatch(applyKernel, Mathf.CeilToInt(atoms.Length / 32), 1, 1);
         atomsBuffer.GetData(atoms);
         atomsBuffer.Dispose();
     }

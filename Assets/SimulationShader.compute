@@ -1,5 +1,6 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel Simulate
+#pragma kernel CalculateVelocity
+#pragma kernel ApplyVelocity
 
 struct Atom {
     int type;
@@ -18,8 +19,64 @@ float friction;
 float width;
 float height;
 
+
+float2 calculateAttraction(Atom atom1, Atom atom2) {
+    float dx = atom1.position.x - atom2.position.x;
+    if (dx > width / 2.0) {
+        dx = dx - width;
+    }
+    else if (-dx > width / 2.0) {
+        dx = width + dx;
+    }
+    float dy = atom1.position.y - atom2.position.y;
+    if (dy > height / 2.0) {
+        dy = dy - height;
+    }
+    else if (-dy > height / 2.0) {
+        dy = height + dy;
+    }
+
+    float2 diff = float2(dx, dy);
+    float l = length(diff);
+
+    float length = typesLength[atom1.type].xyzw[atom2.type];
+    float strength = typesStrength[atom1.type].xyzw[atom2.type];
+    float attr = 0;
+
+    if (l > 0.0001 && l < 0.25) {
+        attr = -(20 / (l * 2));
+    }
+    else if (l > 0.25) {
+        float le = length - (l - 0.25);
+        if (le < 0) {
+            attr = strength * min((length - le), 0);
+        }
+        else if (le > 0) {
+            attr = strength * le / length;
+        }
+    }
+    float2 res = float2(-diff.x * attr, -diff.y * attr);
+    return res;
+}
+
 [numthreads(32,1,1)]
-void Simulate (uint3 id : SV_DispatchThreadID)
+void CalculateVelocity (uint3 id : SV_DispatchThreadID)
+{
+    Atom atom = atoms[id.x];
+
+    float2 force = float2(0, 0);
+    for (unsigned int i = 0, ilen = atoms.Length; i < ilen; i++) {
+        if (i != id.x) {
+            force += calculateAttraction(atom, atoms[i]);
+        }
+    }
+
+    atom.velocity = float2((atom.velocity.x + force.x * time) * friction, (atom.velocity.y + force.y * time) * friction);
+    atoms[id.x] = atom;
+}
+
+[numthreads(32, 1, 1)]
+void ApplyVelocity (uint3 id : SV_DispatchThreadID)
 {
     Atom atom = atoms[id.x];
     float h = 0.01;
@@ -28,58 +85,16 @@ void Simulate (uint3 id : SV_DispatchThreadID)
     if (newPos.x < -h) {
         newPos.x = width;
     }
-    if (newPos.x > width+h) {
+    if (newPos.x > width + h) {
         newPos.x = 0;
     }
     if (newPos.y < -h) {
         newPos.y = height;
     }
-    if (newPos.y > height+h) {
+    if (newPos.y > height + h) {
         newPos.y = 0;
     }
     atom.position = newPos;
-
-    float2 force = float2(0, 0);
-    for (unsigned int i = 0, ilen = atoms.Length; i < ilen; i++) {
-        float dx = atom.position.x - atoms[i].position.x;
-        if (dx > width / 2.0) {
-            dx = dx - width;
-        } else if (-dx > width / 2.0) {
-            dx = width + dx;
-        }
-        float dy = atom.position.y - atoms[i].position.y;
-        if (dy > height / 2.0) {
-            dy = dy - height;
-        }
-        else if (-dy > height / 2.0) {
-            dy = height + dy;
-        }
-
-        float2 diff = float2(dx,dy);
-        float l = length(diff);
-
-        float length = typesLength[atom.type].xyzw[atoms[i].type];
-        float strength = typesStrength[atom.type].xyzw[atoms[i].type];
-        float attr = 0;
-        
-        if (i != id.x) {
-            if (l > 0.000000001 && l < 0.25) {
-                attr = -(20 / (l * 2));
-            }
-            else if(l > 0.25) {
-                float le = length - (l - 0.25);
-                if (le < 0) {
-                    attr = strength * min((length - le), 0);
-                }
-                else if (le > 0) {
-                    attr = strength * le / length;
-                }
-            }
-            float2 res = float2(-diff.x * attr, -diff.y * attr);
-            force = float2(force.x + res.x, force.y + res.y);
-        }
-    }
-
-    atom.velocity = float2((atom.velocity.x + force.x * time) * friction, (atom.velocity.y + force.y * time)*friction);
     atoms[id.x] = atom;
+
 }

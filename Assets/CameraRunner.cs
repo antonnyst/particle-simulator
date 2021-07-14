@@ -33,6 +33,22 @@ public class CameraRunner : MonoBehaviour
         {
             pos += Vector2.ClampMagnitude(new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")),1) * Time.unscaledDeltaTime * moveSpeed * cameraSize / 10f;
             followAtom = -1;
+            if (pos.x > simulationRunner.width)
+            {
+                pos.x -= simulationRunner.width;
+            }
+            if (pos.x < 0)
+            {
+                pos.x += simulationRunner.width;
+            }
+            if (pos.y > simulationRunner.width)
+            {
+                pos.y -= simulationRunner.width;
+            }
+            if (pos.y < 0)
+            {
+                pos.y += simulationRunner.width;
+            }
         }
         if (followAtom > -1)
         {
@@ -41,6 +57,7 @@ public class CameraRunner : MonoBehaviour
         if (Input.GetAxis("Mouse ScrollWheel") != 0)
         {
             cameraSize = cameraSize + cameraSize * -Input.GetAxis("Mouse ScrollWheel") * Time.unscaledDeltaTime * scrollSpeed * 20;
+            cameraSize = Mathf.Min(cameraSize, simulationRunner.width);
         }
         if (Input.GetKeyDown(KeyCode.Backspace))
         {
@@ -118,7 +135,7 @@ public class CameraRunner : MonoBehaviour
         int width = source.width;
         int height = source.height;
        
-        int renderKernel = computeShader.FindKernel("Render");
+        int renderKernel = computeShader.FindKernel("Render3");
         int clearKernel = computeShader.FindKernel("Clear");
         
         int atomsSize = sizeof(int) + sizeof(float) * 4;
