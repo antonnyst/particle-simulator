@@ -46,6 +46,9 @@ public class Menu : MonoBehaviour
     [Space]
     public Toggle colorsToggle;
 
+    [Space]
+    public Toggle renderingToggle;
+
     // Update is called once per frame
     void Update()
     {
@@ -112,6 +115,10 @@ public class Menu : MonoBehaviour
         cameraRunner.randomColors = colorsToggle.isOn;
     }
 
+    public void ChangeRendering()
+    {
+        cameraRunner.repeatingRender = renderingToggle.isOn;
+    }
 
     public void RestartSimulation()
     {

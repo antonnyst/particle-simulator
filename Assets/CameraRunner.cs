@@ -20,6 +20,7 @@ public class CameraRunner : MonoBehaviour
     public float scrollSpeed;
 
     public bool randomColors;
+    public bool repeatingRender;
 
     void Start()
     {
@@ -152,7 +153,7 @@ public class CameraRunner : MonoBehaviour
         int width = source.width;
         int height = source.height;
        
-        int renderKernel = computeShader.FindKernel("RepeatingRender");
+        int renderKernel = computeShader.FindKernel(repeatingRender ? "RepeatingRender" : "Render");
         int clearKernel = computeShader.FindKernel("Clear");
         
         int atomsSize = sizeof(int) + sizeof(float) * 4;
