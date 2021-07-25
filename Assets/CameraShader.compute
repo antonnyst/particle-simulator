@@ -2,6 +2,7 @@
 #pragma kernel Render
 #pragma kernel RepeatingRender
 #pragma kernel Clear
+#define maxTypes 16
 
 struct Atom {
     int type;
@@ -11,7 +12,7 @@ struct Atom {
 
 StructuredBuffer<Atom> Atoms;
 
-float4 Colors[4];
+float4 Colors[maxTypes];
 float2 Position;
 
 int Width;

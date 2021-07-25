@@ -11,13 +11,21 @@ public struct Atom
 
 public class SimulationRunner : MonoBehaviour
 {
+    public bool debugFlag;
+
     public ComputeShader computeShader;
     public bool RandomAttractions;
 
     public Atom[] atoms;
 
+    public int typeCount;
+    int _typeCount;
     public float[] typesStrength;
     public float[] typesLength;
+
+    float[] _typesStrength;
+    float[] _typesLength;
+
     [Space]
 
     public int atomCount;
@@ -56,6 +64,7 @@ public class SimulationRunner : MonoBehaviour
     public void InitSim()
     {
         _atomCount = atomCount;
+        _typeCount = typeCount;
 
         atoms = new Atom[_atomCount];
         width = Mathf.Sqrt(_atomCount / density);
@@ -65,11 +74,14 @@ public class SimulationRunner : MonoBehaviour
             atoms[i] = new Atom();
             atoms[i].position = new Vector2((i / density) % width, (i / density) / width);
             atoms[i].velocity = new Vector2(Random.Range(-2f, 2f), Random.Range(-2f, 2f));
-            atoms[i].type = Random.Range(0, 4);
+            atoms[i].type = Random.Range(0, _typeCount);
 
         }
-        if (RandomAttractions)
+        if (RandomAttractions || typesLength.Length != _atomCount || typesStrength.Length != _atomCount)
         {
+            typesStrength = new float[_typeCount * _typeCount];
+            typesLength = new float[_typeCount * _typeCount];
+
             for (int i = 0; i < typesStrength.Length; i++)
             {
                 typesStrength[i] = Random.Range(-1f, 1f);
@@ -80,7 +92,16 @@ public class SimulationRunner : MonoBehaviour
             }
         }
 
-        timeOut = 0.1f;
+        _typesLength = new float[_typeCount * _typeCount * 4];
+        _typesStrength = new float[_typeCount * _typeCount * 4];
+
+        for (int i = 0; i < _typeCount * _typeCount; i++)
+        {
+            _typesLength[i*4] = typesLength[i];
+            _typesStrength[i*4] = typesStrength[i];
+        }
+        
+        timeOut = 0.01f;
     }
 
     void RunSim(float deltaTime)
@@ -92,9 +113,10 @@ public class SimulationRunner : MonoBehaviour
 
         computeShader.SetFloat("time", deltaTime);
         computeShader.SetFloat("friction", 1 - friction);
-        computeShader.SetFloats("typesStrength", typesStrength);
-        computeShader.SetFloats("typesLength", typesLength);
-        computeShader.SetInt("typeCount", 4);
+        computeShader.SetFloats("typesStrength", _typesStrength);
+        computeShader.SetFloats("typesTest", typesStrength);
+        computeShader.SetFloats("typesLength", _typesLength);
+        computeShader.SetInt("typeCount", _typeCount);
 
         computeShader.SetFloat("width", width);
         computeShader.SetFloat("height", width);

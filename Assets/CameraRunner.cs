@@ -114,8 +114,9 @@ public class CameraRunner : MonoBehaviour
 
     public void InitCamera()
     {
-        if (randomColors)
+        if (randomColors || colors.Length != simulationRunner.typeCount)
         {
+            colors = new Color[simulationRunner.typeCount];
             List<Color> chosen = new List<Color>();
             int colorLevels = 3;
             for (int i = 0; i < colors.Length; i++)
@@ -126,7 +127,7 @@ public class CameraRunner : MonoBehaviour
                     r = Random.Range(0, colorLevels);
                     g = Random.Range(0, colorLevels);
                     b = Random.Range(0, colorLevels);
-                } while (r + g + b < 2 || chosen.Contains(new Color(r / (float)colorLevels - 1, g / (float)colorLevels - 1, b / (float)colorLevels - 1)));
+                } while (r + g + b < 2 || chosen.Contains(new Color(r / (float)(colorLevels - 1), g / (float)(colorLevels - 1), b / (float)(colorLevels - 1))));
 
                 colors[i] = new Color(r / (float)(colorLevels - 1), g / (float)(colorLevels - 1), b / (float)(colorLevels - 1));
                 chosen.Add(colors[i]);

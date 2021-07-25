@@ -40,6 +40,10 @@ public class Menu : MonoBehaviour
     public TextMeshProUGUI moveSpeedText;
 
     [Space]
+    public Slider typeCountSlider;
+    public TextMeshProUGUI typeCountText;
+
+    [Space]
     public Slider zoomSpeedSlider;
     public TextMeshProUGUI zoomSpeedText;
 
@@ -118,6 +122,12 @@ public class Menu : MonoBehaviour
     public void ChangeRendering()
     {
         cameraRunner.repeatingRender = renderingToggle.isOn;
+    }
+
+    public void ChangeTypeCount()
+    {
+        simulationRunner.typeCount = (int)typeCountSlider.value;
+        typeCountText.text = typeCountSlider.value.ToString("0");
     }
 
     public void RestartSimulation()
