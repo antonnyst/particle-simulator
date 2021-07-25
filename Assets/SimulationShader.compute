@@ -45,8 +45,8 @@ float2 calculateAttraction(Atom atom1, Atom atom2) {
 
     float attr = 0;
 
-    if (l > 0.0001 && l < 0.25) {
-        attr = -(20 / (l * 2));
+    if (l > 0.0000001 && l < 0.25) {
+        attr = -(10 / (l));
     }
     else if (l > 0.25) {
         float le = length - (l - 0.25);
@@ -81,20 +81,19 @@ void CalculateVelocity (uint3 id : SV_DispatchThreadID)
 void ApplyVelocity(uint3 id : SV_DispatchThreadID)
 {
     Atom atom = atoms[id.x];
-    float h = 0.01;
 
     float2 newPos = atom.position + atom.velocity * time;
-    if (newPos.x < -h) {
-        newPos.x = width;
+    if (newPos.x < 0) {
+        newPos.x += width;
     }
-    if (newPos.x > width + h) {
-        newPos.x = 0;
+    if (newPos.x > width) {
+        newPos.x -= width;
     }
-    if (newPos.y < -h) {
-        newPos.y = height;
+    if (newPos.y < 0) {
+        newPos.y += height;
     }
-    if (newPos.y > height + h) {
-        newPos.y = 0;
+    if (newPos.y > height) {
+        newPos.y -= height;
     }
     
     atom.position = newPos;
