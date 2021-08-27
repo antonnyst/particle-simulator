@@ -1,7 +1,8 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CalculateVelocity
 #pragma kernel ApplyVelocity
-#define maxTypes 16
+#define maxTypes 32
+#define particleBorder 0.5
 
 struct Atom {
     int type;
@@ -45,11 +46,11 @@ float2 calculateAttraction(Atom atom1, Atom atom2) {
 
     float attr = 0;
 
-    if (l > 0.0000001 && l < 0.25) {
-        attr = -(10 / (l));
+    if (l < particleBorder) {
+        attr = (1/particleBorder) - (particleBorder / (l*l));
     }
     else if (l > 0.25) {
-        float le = length - (l - 0.25);
+        float le = length - (l - particleBorder);
         if (le < 0) {
             attr = strength * min((length - le), 0);
         }

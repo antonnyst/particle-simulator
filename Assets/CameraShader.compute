@@ -2,7 +2,7 @@
 #pragma kernel Render
 #pragma kernel RepeatingRender
 #pragma kernel Clear
-#define maxTypes 16
+#define maxTypes 32
 
 struct Atom {
     int type;

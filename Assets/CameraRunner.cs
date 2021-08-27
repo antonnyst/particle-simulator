@@ -119,6 +119,12 @@ public class CameraRunner : MonoBehaviour
             colors = new Color[simulationRunner.typeCount];
             List<Color> chosen = new List<Color>();
             int colorLevels = 3;
+            while ((colorLevels*colorLevels*colorLevels-3)<colors.Length)
+            {
+                colorLevels++;
+            }
+            
+
             for (int i = 0; i < colors.Length; i++)
             {
                 int r, g, b;

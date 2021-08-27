@@ -715,7 +715,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7024502886709646554, guid: 49ea436863a8a24448f3d273a1dc8052, type: 3}
       propertyPath: m_MaxValue
-      value: 20
+      value: 64
       objectReference: {fileID: 0}
     - target: {fileID: 7024502886709646554, guid: 49ea436863a8a24448f3d273a1dc8052, type: 3}
       propertyPath: m_MinValue
@@ -3243,7 +3243,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05d748aae6e6d464c930f09ff309b445, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  debugFlag: 0
   computeShader: {fileID: 7200000, guid: 127cacfe8b4badd4191546a5d26e2c83, type: 3}
   RandomAttractions: 0
   typeCount: 4
