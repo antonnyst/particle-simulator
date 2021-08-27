@@ -72,9 +72,22 @@ public class SimulationRunner : MonoBehaviour
             atoms[i] = new Atom();
             atoms[i].position = new Vector2((i / density) % width, (i / density) / width);
             atoms[i].velocity = new Vector2(Random.Range(-2f, 2f), Random.Range(-2f, 2f));
-            atoms[i].type = i % _typeCount;//Random.Range(0, _typeCount);
-
+            atoms[i].type = i % _typeCount;
         }
+
+        for (int i= 0; i < atoms.Length; i++)
+        {
+            Atom tmp = atoms[i];
+            int r = Random.Range(i, atoms.Length);
+            atoms[i] = atoms[r];
+            atoms[r] = tmp;
+        }
+
+        for (int i = 0; i < atoms.Length; i++)
+        {
+            atoms[i].position = new Vector2((i / density) % width, (i / density) / width);
+        }
+
         if (RandomAttractions || typesLength.Length != _typeCount  * _typeCount || typesStrength.Length != _typeCount * _typeCount)
         {
             typesStrength = new float[_typeCount * _typeCount];
